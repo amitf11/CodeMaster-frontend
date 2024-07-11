@@ -1,9 +1,12 @@
 import './App.css'
+import { Lobby } from './pages/Lobby'
 
 function App() {
 
   return (
-    <div>App</div>
+    <main>
+      <Lobby/>
+    </main>
   )
 }
 
