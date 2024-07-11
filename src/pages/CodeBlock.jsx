@@ -2,13 +2,19 @@ import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 
 import { blockService } from "../services/block.service"
+import { SOCKET_EVENT_JOIN, socketService } from "../services/socket.service"
 
 export const CodeBlock = () => {
     const { blockId } = useParams()
     const [block, setBlock] = useState(null)
+    const [role, setRole] = useState('student')
 
     useEffect(() => {
         loadBlock()
+    }, [])
+
+    useEffect(() => {
+        socketService.emit('join', { blockId, role })
     }, [])
 
     const loadBlock = async () => {
