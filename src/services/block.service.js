@@ -7,7 +7,7 @@ export const blockService = {
 }
 
 function query() {
-    return httpService.get('block')
+    return httpService.get('blocks')
 }
 
 function getById(blockId) {
