@@ -13,7 +13,7 @@ export const Lobby = () => {
         try {
             const blocks = await blockService.query()
             setBlocks(blocks)
-        } catch (error) {
+        } catch (error) { //TODO: Improve error handling
             console.log('Error loading blocks', error)
         }
     }
