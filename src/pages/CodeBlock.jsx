@@ -7,21 +7,36 @@ import { SOCKET_EVENT_JOIN, socketService } from "../services/socket.service"
 export const CodeBlock = () => {
     const { blockId } = useParams()
     const [block, setBlock] = useState(null)
-    const [role, setRole] = useState('student')
+    const [role, setRole] = useState('')
 
     useEffect(() => {
         loadBlock()
     }, [])
 
     useEffect(() => {
-        socketService.emit('join', { blockId, role })
-    }, [])
+        socketService.emit(SOCKET_EVENT_JOIN, { blockId })
+
+        socketService.on('setRole', (assignedRole) => {
+            setRole(assignedRole)
+            console.log('role:', assignedRole)
+        })
+
+        socketService.on('mentorLeft', () => {
+            if (role === 'student') {
+                alert('The mentor has left. Redirecting to the lobby.')
+                window.location.href = '/' // Redirect to the lobby
+            }
+        })
+
+        return () => {
+            socketService.emit('leave', { blockId })
+        }
+    }, [blockId])
 
     const loadBlock = async () => {
         try {
             const block = await blockService.getById(blockId)
             setBlock(block)
-            console.log('block:', block)
         } catch (error) { //TODO: Improve error handling
             console.log('Error loading block', error)
         }
