@@ -1,21 +1,17 @@
+import { Link } from "react-router-dom"
 import { BlockPreview } from "./BlockPreview"
 
-export const BlockList = () => {
-    const blocks = [
-        {
-            title: 'test'
-        }
-    ]
+export const BlockList = ({ blocks }) => {
 
     return (
-        <section>
-            BlockList
-            {blocks.map((block, idx) => (
-                <BlockPreview
-                    key={idx}
-                    block={block}
-                />
+        <ul>
+            {blocks.map((block) => (
+                <li key={block._id}>
+                    <Link to={`/block/${block._id}`}>
+                        <BlockPreview block={block} />
+                    </Link>
+                </li>
             ))}
-        </section>
+        </ul>
     )
 }
