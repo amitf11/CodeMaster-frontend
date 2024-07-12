@@ -19,9 +19,10 @@ export const Lobby = () => {
     }
 
     return (
-        <div>
-            Lobby
-            <BlockList blocks={blocks}/>
-        </div>
+        <section className="flex column align-center main-lobby-container">
+            <h1>Welcome to Tom's Coding Academy Lobby!</h1>
+            <div>Select a code block below to start coding.</div>
+            <BlockList blocks={blocks} />
+        </section>
     )
 }

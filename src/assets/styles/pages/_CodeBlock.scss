@@ -1,0 +1,19 @@
+.code-block-container {
+    padding: 2em;
+
+    h1 {
+        margin-bottom: 1em;
+        .difficulty-span {
+            font-size: .75em;
+            margin-left: 1em;
+        }
+    }
+
+    p {
+        margin: 0;
+    }
+
+    .editor {
+        margin-top: 2em;
+    }
+}

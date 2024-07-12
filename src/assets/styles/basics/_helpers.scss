@@ -1,0 +1,59 @@
+.flex {
+    display: flex;
+  
+    >*.full {
+      flex: 1;
+    }
+  
+    &.column {
+      flex-direction: column;
+    }
+  
+    &.justify-center {
+      justify-content: center;
+    }
+  
+    &.align-center {
+      align-items: center;
+    }
+  
+    &.space-between {
+      justify-content: space-between;
+    }
+
+    &.align-end {
+      align-items: flex-end;
+    }
+  
+    &.center {
+      margin-inline: auto;
+      width: min(100%, 1400px);
+      padding: 0 32px;
+    }
+  }
+
+  .tac {
+    text-align: center;
+  }
+  
+  .bold {
+    font-weight: 600;
+  }
+  
+  .clean-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .easy {
+    color: green;
+  }
+
+  .medium {
+    color: yellow;
+  }
+
+  .hard {
+    color: red;
+  }

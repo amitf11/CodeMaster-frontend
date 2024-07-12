@@ -3,7 +3,6 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { blockService } from "../services/block.service"
 import { socketService } from "../services/socket.service"
-import { utilService } from '../services/util.service'
 
 export const CodeBlock = () => {
     const navigate = useNavigate()
@@ -61,14 +60,27 @@ export const CodeBlock = () => {
     if (!block) return <div>Loading...</div>
 
     return (
-        <>
-            <div>CodeBlock title: {block.title}</div>
-            <div>Users: {usersCount}</div>
-            <div>Welcome {role}!</div>
-            <button onClick={() => navigate('/')}>Back</button>
-            {role === 'student' && <button onClick={handleSubmit}>Submit</button>}
+        <section className='code-block-container'>
+            <div className='flex space-between'>
+                <div> {/*TODO: Move all these to a component */}
+                    <h1>{block.title} <span className={block.difficulty + ' difficulty-span'}>{block.difficulty}</span></h1>
+                    <h3>Instructions:</h3>
+                    <p>{block.description}</p>
+                </div>
+                <div className='flex column align-center'>
+                    <div>Welcome {role === 'mentor' ? 'Tom' : 'Student'}!</div>
+                    <div>Users: {usersCount}</div>
+                </div>
+            </div>
+            <div>
+                <button onClick={() => navigate('/')}>Back</button>
+                <button>Hint</button>
+                {role === 'student' && <button onClick={handleSubmit}>Submit</button>}
+            </div>
             <Editor
+                className='editor'
                 height="400px"
+                width="70%"
                 language="javascript"
                 value={code}
                 theme="vs-dark"
@@ -77,6 +89,6 @@ export const CodeBlock = () => {
                     fontSize: 16,
                     readOnly: role === 'mentor'
                 }} />
-        </>
+        </section>
     )
 }
