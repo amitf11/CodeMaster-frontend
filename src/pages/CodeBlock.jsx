@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { blockService } from "../services/block.service"
 import { socketService } from "../services/socket.service"
+import { utilService } from '../services/util.service'
 
 export const CodeBlock = () => {
     const navigate = useNavigate()
@@ -19,9 +20,9 @@ export const CodeBlock = () => {
     useEffect(() => {
         socketService.emit('join', blockId)
         socketService.on('setRole', setRole)
+        socketService.on('codeUpdate', setCode)
         socketService.on('mentorLeft', onMentorLeave)
         socketService.on('updateUsers', setUsersCount)
-        socketService.on('codeUpdate', setCode)
 
         return () => {
             socketService.emit('leave', blockId)
@@ -53,9 +54,19 @@ export const CodeBlock = () => {
     }
 
     const handleSubmit = () => {
-        // socketService.emit('submitCode', { blockId, code })
+        try {
+            if (utilService.evaluateCode(code, block.solution, block.tests)) {
+                // socketService.emit('codeSubmit', { blockId, success: true })
+                alert('Success! Your solution is correct.')
+            } else {
+                alert('Your solution is incorrect. Please try again.')
+            }
+        } catch (error) {
+            console.error('Error evaluating code', error)
+            alert('Error evaluating code. Please check your solution.')
+        }
     }
-
+    
 
     if (!block) return <div>Loading...</div>
 
