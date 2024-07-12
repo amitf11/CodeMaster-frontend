@@ -6,30 +6,22 @@ import { SOCKET_EVENT_JOIN, socketService } from "../services/socket.service"
 
 export const CodeBlock = () => {
     const { blockId } = useParams()
-    const [block, setBlock] = useState(null)
     const [role, setRole] = useState('')
+    const [block, setBlock] = useState(null)
+    const [usersCount, setUsersCount] = useState(0)
 
     useEffect(() => {
         loadBlock()
     }, [])
 
     useEffect(() => {
-        socketService.emit(SOCKET_EVENT_JOIN, { blockId })
-
-        socketService.on('setRole', (assignedRole) => {
-            setRole(assignedRole)
-            console.log('role:', assignedRole)
-        })
-
-        socketService.on('mentorLeft', () => {
-            if (!role) {
-                alert('The mentor has left. Redirecting to the lobby.')
-                window.location.href = '/' // Redirect to the lobby
-            }
-        })
+        socketService.emit(SOCKET_EVENT_JOIN, blockId)
+        socketService.on('setRole', setRole)
+        socketService.on('mentorLeft', onMentorLeave)
+        socketService.on('updateUsers', setUsersCount)
 
         return () => {
-            socketService.emit('leave', { blockId })
+            socketService.emit('leave', blockId)
             socketService.off('setRole')
             socketService.off('mentorLeft')
         }
@@ -44,13 +36,17 @@ export const CodeBlock = () => {
         }
     }
 
+    const onMentorLeave = () => {
+        alert('The mentor has left. Redirecting to the lobby.')
+        window.location.href = '/' // Redirect to the lobby
+    }
+
     if (!block) return <div>Loading...</div>
 
     return (
-        <div>
-            CodeBlock ID: {block._id}
-            CodeBlock title: {block.title}
-            CodeBlock code: {block.code}
-        </div>
+        <>
+            <div>CodeBlock title: {block.title}</div>
+            <div>Users: {usersCount}</div>
+        </>
     )
 }
