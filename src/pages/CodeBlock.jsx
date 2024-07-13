@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
-import Editor from '@monaco-editor/react'
-import { utilService } from '../services/util.service'
+import { utilService } from "../services/util.service"
 import { blockService } from "../services/block.service"
 import { socketService } from "../services/socket.service"
+
+import Editor from "@monaco-editor/react"
 import useAlert from "../custom hooks/useAlert"
 
 export const CodeBlock = () => {
@@ -15,7 +16,7 @@ export const CodeBlock = () => {
 
     const navigate = useNavigate()
     const { blockId } = useParams()
-    const { showAlert, showConfirm } = useAlert()
+    const { showAlert } = useAlert()
 
     useEffect(() => {
         loadBlock()
@@ -39,6 +40,7 @@ export const CodeBlock = () => {
 
     const loadBlock = async () => {
         try {
+            console.log('blockId:', blockId)
             const block = await blockService.getById(blockId)
             setBlock(block)
             setCode(block.initialCode)
@@ -64,7 +66,7 @@ export const CodeBlock = () => {
     const handleSubmit = () => {
         try {
             if (utilService.evaluateCode(code, block.solution, block.tests)) {
-                // socketService.emit('codeSubmit', { blockId, success: true })
+                // socketService.emit('codeSubmit', { blockId, success: true }) //TODO: Let the mentor knows when student solves the challenge
                 showAlert({
                     title: 'Success!',
                     text: 'Your solution is correct.',
@@ -86,7 +88,6 @@ export const CodeBlock = () => {
             })
         }
     }
-
 
     if (!block) return <div>Loading...</div>
 

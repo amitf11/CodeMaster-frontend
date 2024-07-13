@@ -13,7 +13,3 @@ function query() {
 function getById(blockId) {
     return httpService.get(`blocks/${blockId}`)
 }
-
-function update(block) {
-    return httpService.put(`blocks/${blockId}`, block)
-}
