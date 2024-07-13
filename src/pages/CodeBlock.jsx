@@ -1,17 +1,21 @@
-import Editor from '@monaco-editor/react'
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+
+import Editor from '@monaco-editor/react'
+import { utilService } from '../services/util.service'
 import { blockService } from "../services/block.service"
 import { socketService } from "../services/socket.service"
-import { utilService } from '../services/util.service'
+import useAlert from "../custom hooks/useAlert"
 
 export const CodeBlock = () => {
-    const navigate = useNavigate()
-    const { blockId } = useParams()
     const [role, setRole] = useState('')
     const [code, setCode] = useState('')
     const [block, setBlock] = useState(null)
     const [usersCount, setUsersCount] = useState(0)
+
+    const navigate = useNavigate()
+    const { blockId } = useParams()
+    const { showAlert, showConfirm } = useAlert()
 
     useEffect(() => {
         loadBlock()
@@ -44,7 +48,11 @@ export const CodeBlock = () => {
     }
 
     const onMentorLeave = () => {
-        alert('The mentor has left. Redirecting to the lobby.')
+        showAlert({
+            title: 'Alert',
+            text: 'The mentor has left. Redirecting to the lobby.',
+            icon: 'info'
+        })
         navigate('/') // Redirect to the lobby
     }
 
@@ -57,16 +65,28 @@ export const CodeBlock = () => {
         try {
             if (utilService.evaluateCode(code, block.solution, block.tests)) {
                 // socketService.emit('codeSubmit', { blockId, success: true })
-                alert('Success! Your solution is correct.')
+                showAlert({
+                    title: 'Success!',
+                    text: 'Your solution is correct.',
+                    icon: 'success'
+                })
             } else {
-                alert('Your solution is incorrect. Please try again.')
+                showAlert({
+                    title: 'Wrong Answer!',
+                    text: 'Your solution is incorrect. Please try again.',
+                    icon: 'error'
+                })
             }
         } catch (error) {
             console.error('Error evaluating code', error)
-            alert('Error evaluating code. Please check your solution.')
+            showAlert({
+                title: 'Error',
+                text: 'Had trouble evaluating code. Please check your solution.',
+                icon: 'question'
+            })
         }
     }
-    
+
 
     if (!block) return <div>Loading...</div>
 
