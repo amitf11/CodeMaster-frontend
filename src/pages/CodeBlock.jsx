@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 import { utilService } from "../services/util.service"
@@ -42,7 +42,6 @@ export const CodeBlock = () => {
 
     const loadBlock = async () => {
         try {
-            console.log('blockId:', blockId)
             const block = await blockService.getById(blockId)
             setBlock(block)
             setCode(block.initialCode)
@@ -59,7 +58,7 @@ export const CodeBlock = () => {
         })
         navigate('/') // Redirect to the lobby
     }
-    
+
     const onStudentSuccess = () => {
         showAlert({
             title: 'Success!',
@@ -82,6 +81,7 @@ export const CodeBlock = () => {
                     text: 'Your solution is correct.',
                     icon: 'success'
                 })
+                navigate('/')
             } else {
                 showAlert({
                     title: 'Wrong Answer!',
@@ -119,7 +119,7 @@ export const CodeBlock = () => {
                 {role === 'student' && <button onClick={handleSubmit}>Submit</button>}
             </div>
             <Editor
-                className='editor'
+                className="editor"
                 height="400px"
                 width="70%"
                 language="javascript"
