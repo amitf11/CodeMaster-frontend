@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 import { utilService } from "../services/util.service"
@@ -18,6 +18,9 @@ export const CodeBlock = () => {
     const { blockId } = useParams()
     const { showAlert } = useAlert()
 
+    const codeRef = useRef('')
+    const editorRef = useRef(null)
+
     useEffect(() => {
         loadBlock()
     }, [])
@@ -25,9 +28,9 @@ export const CodeBlock = () => {
     useEffect(() => {
         socketService.emit('join', blockId)
         socketService.on('setRole', setRole)
-        socketService.on('codeUpdate', setCode)
         socketService.on('mentorLeft', onMentorLeave)
         socketService.on('updateUsers', setUsersCount)
+        socketService.on('codeUpdate', handleCodeUpdate)
         socketService.on('studentSuccess', onStudentSuccess)
 
         return () => {
@@ -44,7 +47,7 @@ export const CodeBlock = () => {
         try {
             const block = await blockService.getById(blockId)
             setBlock(block)
-            setCode(block.initialCode)
+            codeRef.current = block.initialCode
         } catch (error) {
             console.log('Error loading block', error)
         }
@@ -67,10 +70,14 @@ export const CodeBlock = () => {
         })
     }
 
-    const handleCodeChange = (value) => {
-        setCode(value)
+    const handleCodeUpdate = useCallback(({ code: updatedCode }) => {
+        codeRef.current = updatedCode
+    }, [])
+
+    const handleCodeChange = useCallback((value) => {
+        codeRef.current = value
         socketService.emit('codeChange', { blockId, code: value })
-    }
+    }, [blockId])
 
     const handleSubmit = () => {
         try {
@@ -99,6 +106,11 @@ export const CodeBlock = () => {
         }
     }
 
+    const onMount = (editor) => {
+        editorRef.current = editor
+        editorRef.current.setValue(codeRef.current)
+    }
+
     if (!block) return <div>Loading...</div>
 
     return (
@@ -123,13 +135,15 @@ export const CodeBlock = () => {
                 height="400px"
                 width="70%"
                 language="javascript"
-                value={code}
+                value={codeRef.current}
                 theme="vs-dark"
                 onChange={handleCodeChange}
                 options={{
                     fontSize: 16,
                     readOnly: role === 'mentor'
-                }} />
+                }}
+                editorDidMount={onMount}
+            />
         </section>
     )
 }
