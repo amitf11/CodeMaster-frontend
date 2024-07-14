@@ -11,22 +11,7 @@ const useAlert = () => {
     })
   }
 
-  const showConfirm = (msg, callback) => { //TODO: Remove if not using
-    Swal.fire({
-      title: 'Confirm',
-      text: msg,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        callback()
-      }
-    })
-  }
-
-  return { showAlert, showConfirm }
+  return { showAlert }
 }
 
 export default useAlert

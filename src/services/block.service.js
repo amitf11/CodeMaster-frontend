@@ -3,7 +3,6 @@ import { httpService } from "./http.service"
 export const blockService = {
     query,
     getById,
-    update,
 }
 
 function query() {

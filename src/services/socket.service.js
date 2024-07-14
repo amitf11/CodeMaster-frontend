@@ -1,7 +1,5 @@
 import io from 'socket.io-client'
 
-export const SOCKET_EVENT_JOIN = 'join' //TODO: Check for convention needs
-
 const baseUrl = (process.env.NODE_ENV === 'production') ? '' : '//localhost:3030'
 export const socketService = createSocketService()
 

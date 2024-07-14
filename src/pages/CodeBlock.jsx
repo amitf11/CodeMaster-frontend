@@ -28,6 +28,7 @@ export const CodeBlock = () => {
         socketService.on('codeUpdate', setCode)
         socketService.on('mentorLeft', onMentorLeave)
         socketService.on('updateUsers', setUsersCount)
+        socketService.on('studentSuccess', onStudentSuccess)
 
         return () => {
             socketService.emit('leave', blockId)
@@ -35,6 +36,7 @@ export const CodeBlock = () => {
             socketService.off('codeUpdate')
             socketService.off('mentorLeft')
             socketService.off('updateUsers')
+            socketService.off('studentSuccess')
         }
     }, [blockId])
 
@@ -44,7 +46,7 @@ export const CodeBlock = () => {
             const block = await blockService.getById(blockId)
             setBlock(block)
             setCode(block.initialCode)
-        } catch (error) { //TODO: Improve error handling
+        } catch (error) {
             console.log('Error loading block', error)
         }
     }
@@ -57,6 +59,14 @@ export const CodeBlock = () => {
         })
         navigate('/') // Redirect to the lobby
     }
+    
+    const onStudentSuccess = () => {
+        showAlert({
+            title: 'Success!',
+            text: 'The student has completed the challenge!',
+            icon: 'success'
+        })
+    }
 
     const handleCodeChange = (value) => {
         setCode(value)
@@ -66,7 +76,7 @@ export const CodeBlock = () => {
     const handleSubmit = () => {
         try {
             if (utilService.evaluateCode(code, block.solution, block.tests)) {
-                // socketService.emit('codeSubmit', { blockId, success: true }) //TODO: Let the mentor knows when student solves the challenge
+                socketService.emit('challengeSuccess', blockId)
                 showAlert({
                     title: 'Success!',
                     text: 'Your solution is correct.',
@@ -94,19 +104,18 @@ export const CodeBlock = () => {
     return (
         <section className='code-block-container'>
             <div className='flex space-between'>
-                <div> {/*TODO: Move all these to a component */}
+                <div className='code-block-header'>
                     <h1>{block.title} <span className={block.difficulty + ' difficulty-span'}>{block.difficulty}</span></h1>
                     <h3>Instructions:</h3>
                     <p>{block.description}</p>
                 </div>
                 <div className='flex column align-center'>
                     <div>Welcome {role === 'mentor' ? 'Tom' : 'Student'}!</div>
-                    <div>Users: {usersCount}</div>
+                    <div>Students: {usersCount - 1}</div>
                 </div>
             </div>
-            <div>
+            <div className="flex btns-container">
                 <button onClick={() => navigate('/')}>Back</button>
-                <button>Hint</button>
                 {role === 'student' && <button onClick={handleSubmit}>Submit</button>}
             </div>
             <Editor
