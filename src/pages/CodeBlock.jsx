@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 import { utilService } from "../services/util.service"
@@ -9,9 +9,10 @@ import Editor from "@monaco-editor/react"
 import useAlert from "../custom hooks/useAlert"
 
 export const CodeBlock = () => {
+    const [block, setBlock] = useState(null)
     const [role, setRole] = useState('')
     const [code, setCode] = useState('')
-    const [block, setBlock] = useState(null)
+    const [mentorCode, setMentorCode] = useState('')
     const [usersCount, setUsersCount] = useState(0)
 
     const navigate = useNavigate()
@@ -19,16 +20,25 @@ export const CodeBlock = () => {
     const { showAlert } = useAlert()
 
     useEffect(() => {
-        loadBlock()
-    }, [])
+        const loadBlock = async () => {
+            try {
+                const block = await blockService.getById(blockId)
+                setBlock(block)
+                setCode(block.initialCode)
+                setMentorCode(block.initialCode)
+            } catch (error) {
+                console.log('Error loading block', error)
+            }
+        }
 
-    useEffect(() => {
+        loadBlock()
+
         socketService.emit('join', blockId)
         socketService.on('setRole', setRole)
-        socketService.on('codeUpdate', setCode)
         socketService.on('mentorLeft', onMentorLeave)
         socketService.on('updateUsers', setUsersCount)
         socketService.on('studentSuccess', onStudentSuccess)
+        socketService.on('codeUpdate', handleCodeUpdate)
 
         return () => {
             socketService.emit('leave', blockId)
@@ -39,16 +49,6 @@ export const CodeBlock = () => {
             socketService.off('studentSuccess')
         }
     }, [blockId])
-
-    const loadBlock = async () => {
-        try {
-            const block = await blockService.getById(blockId)
-            setBlock(block)
-            setCode(block.initialCode)
-        } catch (error) {
-            console.log('Error loading block', error)
-        }
-    }
 
     const onMentorLeave = () => {
         showAlert({
@@ -70,6 +70,10 @@ export const CodeBlock = () => {
     const handleCodeChange = (value) => {
         setCode(value)
         socketService.emit('codeChange', { blockId, code: value })
+    }
+
+    const handleCodeUpdate = (code) => {
+        setMentorCode(code)
     }
 
     const handleSubmit = () => {
@@ -123,13 +127,14 @@ export const CodeBlock = () => {
                 height="400px"
                 width="70%"
                 language="javascript"
-                value={code}
+                value={role === 'mentor' ? mentorCode : code}
                 theme="vs-dark"
                 onChange={handleCodeChange}
                 options={{
                     fontSize: 16,
                     readOnly: role === 'mentor'
-                }} />
+                }}
+            />
         </section>
     )
 }
