@@ -7,17 +7,20 @@ import { socketService } from "../services/socket.service"
 
 import Editor from "@monaco-editor/react"
 import useAlert from "../custom hooks/useAlert"
+import { CodeBlockHeader } from "../components/CodeBlockHeader"
 
 export const CodeBlock = () => {
     const [block, setBlock] = useState(null)
     const [role, setRole] = useState('')
     const [code, setCode] = useState('')
-    const [mentorCode, setMentorCode] = useState('')
+    const [theme, setTheme] = useState('vs-dark')
+    const [readOnly, setReadOnly] = useState(true)
     const [usersCount, setUsersCount] = useState(0)
+    const [mentorCode, setMentorCode] = useState('')
 
     const navigate = useNavigate()
     const { blockId } = useParams()
-    const { showAlert } = useAlert()
+    const { showAlert, showConfirmation } = useAlert()
 
     useEffect(() => {
         const loadBlock = async () => {
@@ -34,14 +37,16 @@ export const CodeBlock = () => {
         loadBlock()
 
         socketService.emit('join', blockId)
+        socketService.on('invite', onInvite)
         socketService.on('setRole', setRole)
         socketService.on('mentorLeft', onMentorLeave)
         socketService.on('updateUsers', setUsersCount)
+        socketService.on('codeUpdate', handleCodeUpdate) //Could maybe give "setMentorCode" pointer instead as 2nd argument
         socketService.on('studentSuccess', onStudentSuccess)
-        socketService.on('codeUpdate', handleCodeUpdate)
-
+        
         return () => {
             socketService.emit('leave', blockId)
+            socketService.off('invite')
             socketService.off('setRole')
             socketService.off('codeUpdate')
             socketService.off('mentorLeft')
@@ -49,6 +54,18 @@ export const CodeBlock = () => {
             socketService.off('studentSuccess')
         }
     }, [blockId])
+
+    const onInvite = ({ blockId }) => {
+        showConfirmation({
+            title: 'Invitation',
+            text: 'The mentor has invited you to join their room. Would you like to join?',
+            icon: 'info'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                navigate(`/block/${blockId}`)
+            }
+        })
+    }
 
     const onMentorLeave = () => {
         showAlert({
@@ -74,6 +91,18 @@ export const CodeBlock = () => {
 
     const handleCodeUpdate = (code) => {
         setMentorCode(code)
+    }
+
+    const handleInvite = () => {
+        socketService.emit('invite', { blockId })
+    }
+
+    const toggleTheme = () => {
+        setTheme((prevTheme) => (prevTheme === 'vs-dark' ? 'light' : 'vs-dark'))
+    }
+
+    const toggleReadOnly = () => {
+        setReadOnly((prevReadOnly) => !prevReadOnly)
     }
 
     const handleSubmit = () => {
@@ -107,32 +136,29 @@ export const CodeBlock = () => {
 
     return (
         <section className='code-block-container'>
-            <div className='flex space-between'>
-                <div className='code-block-header'>
-                    <h1>{block.title} <span className={block.difficulty + ' difficulty-span'}>{block.difficulty}</span></h1>
-                    <h3>Instructions:</h3>
-                    <p>{block.description}</p>
-                </div>
-                <div className='flex column align-center'>
-                    <div>Welcome {role === 'mentor' ? 'Tom' : 'Student'}!</div>
-                    <div>Students: {usersCount - 1}</div>
-                </div>
-            </div>
-            <div className="flex btns-container">
-                <button onClick={() => navigate('/')}>Back</button>
-                {role === 'student' && <button onClick={handleSubmit}>Submit</button>}
-            </div>
+            <CodeBlockHeader
+                role={role}
+                block={block}
+                theme={theme}
+                navigate={navigate}
+                readOnly={readOnly}
+                usersCount={usersCount}
+                toggleTheme={toggleTheme}
+                handleInvite={handleInvite}
+                handleSubmit={handleSubmit}
+                toggleReadOnly={toggleReadOnly}
+            />
             <Editor
                 className="editor"
                 height="400px"
                 width="70%"
                 language="javascript"
                 value={role === 'mentor' ? mentorCode : code}
-                theme="vs-dark"
+                theme={theme}
                 onChange={handleCodeChange}
                 options={{
                     fontSize: 16,
-                    readOnly: role === 'mentor'
+                    readOnly: role === 'mentor' && readOnly
                 }}
             />
         </section>

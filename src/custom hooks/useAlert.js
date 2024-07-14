@@ -11,7 +11,18 @@ const useAlert = () => {
     })
   }
 
-  return { showAlert }
+  const showConfirmation = (msg) => {
+    return Swal.fire({
+      title: utilService.capitalizeFirstLetter(msg.title),
+      text: msg.text,
+      icon: msg.icon || 'info',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+    })
+  }
+
+  return { showAlert, showConfirmation }
 }
 
 export default useAlert

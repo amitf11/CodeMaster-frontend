@@ -16,10 +16,22 @@
         p {
             margin: 0;
         }
+
+    }
+
+    .invite-btn {
+        border: none;
+        text-align: center;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        padding: 0.5rem 0.75rem;
+        margin-top: 0.5em;
+        border-radius: 0.375rem;
+        color: #ffffff;
+        background-color: #6366f1;
     }
 
     .btns-container {
-        justify-content: flex-end;
         width: 70%;
         gap: 2em;
         margin-top: 1em;
